@@ -58,6 +58,15 @@ function sanitizeClue(clue: ClueData, clueIndex: number, totalClues: number) {
 
 // ==================== PUBLIC & PLAYER ENDPOINTS ====================
 
+// Health check endpoint
+apiRouter.get('/health', async (_req: Request, res: Response) => {
+  res.json({ success: true, status: 'ok', service: 'BYTE HUNT API', timestamp: new Date().toISOString() });
+});
+
+apiRouter.get('/', async (_req: Request, res: Response) => {
+  res.json({ success: true, status: 'ok', service: 'BYTE HUNT API', timestamp: new Date().toISOString() });
+});
+
 // 1. Team Registration
 apiRouter.post('/teams/register', async (req: Request, res: Response) => {
   try {

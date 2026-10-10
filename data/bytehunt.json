@@ -412,6 +412,15 @@
       "isCorrect": true,
       "id": "att-1791617155531-usd7",
       "timestamp": 1791617155531
+    },
+    {
+      "sessionId": "sess-1791622882487-g5tx2",
+      "teamId": "team-1791622882415-eqnfs",
+      "clueId": "b2-05-c1",
+      "submittedAnswer": "gmail",
+      "isCorrect": false,
+      "id": "att-1791622894105-jqmr",
+      "timestamp": 1791622894105
     }
   ],
   "results": [
@@ -450,6 +459,24 @@
     "disabledPuzzleIds": []
   },
   "auditLogs": [
+    {
+      "id": "log-1791622882488-hxdx",
+      "action": "START_HUNT",
+      "details": "Session started for team team-1791622882415-eqnfs (Assigned word length: 8)",
+      "timestamp": "2026-10-10T09:01:22.488Z"
+    },
+    {
+      "id": "log-1791622882415-nb5a",
+      "action": "CREATE_TEAM",
+      "details": "Team \"qwertyuiop\" registered (ID: team-1791622882415-eqnfs)",
+      "timestamp": "2026-10-10T09:01:22.415Z"
+    },
+    {
+      "id": "log-1791622793304-c980",
+      "action": "ADMIN_LOGIN",
+      "details": "Admin authenticated successfully",
+      "timestamp": "2026-10-10T08:59:53.304Z"
+    },
     {
       "id": "log-1791619238088-bgco",
       "action": "TIME_PENALTY_APPLIED",

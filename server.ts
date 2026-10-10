@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
 import { apiRouter } from './server/api';
+import { db } from './server/db';
 
 dotenv.config();
 
@@ -11,11 +12,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function startServer() {
+  try {
+    await db.ensureInitialized();
+  } catch (err: any) {
+    console.warn('[BYTE HUNT DB] Server startup warning:', err.message);
+  }
+
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
   const isProd = process.env.NODE_ENV === 'production';
 
-  app.use(express.json());
+  app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
 
   // API router

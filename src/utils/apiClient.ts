@@ -57,7 +57,13 @@ export async function apiRequest<T = any>(endpoint: string, options: RequestInit
     headers
   });
 
-  const data = await response.json().catch(() => ({ success: false, error: 'Invalid response from server' }));
+  let data: any;
+  try {
+    data = await response.json();
+  } catch {
+    const statusInfo = response.statusText ? ` (${response.status} ${response.statusText})` : ` (${response.status})`;
+    data = { success: false, error: `Invalid response from server${statusInfo}` };
+  }
 
   if (!response.ok) {
     throw new Error(data.error || `HTTP ${response.status}: Request failed`);

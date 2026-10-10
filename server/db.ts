@@ -195,14 +195,51 @@ class DatabaseService {
   private fileData: DatabaseSchema;
   private pgPool: pg.Pool | null = null;
   private isPostgresReady = false;
+  private initPromise: Promise<void> | null = null;
 
   constructor() {
     this.fileData = this.loadFileDatabase();
-    this.initPostgresIfAvailable();
+    // Start initialization in background; all public methods await ensureInitialized()
+    this.ensureInitialized().catch(err => {
+      console.warn('[BYTE HUNT DB] Background initialization notice:', err.message);
+    });
+  }
+
+  public async ensureInitialized(): Promise<void> {
+    if (this.isPostgresReady) return;
+    if (!this.initPromise) {
+      this.initPromise = this.initPostgresIfAvailable();
+    }
+    return this.initPromise;
   }
 
   // --- File Storage System ---
   private loadFileDatabase(): DatabaseSchema {
+    // If running in Vercel serverless environment, use baseline without disk ops
+    if (process.env.VERCEL) {
+      return {
+        teams: BASELINE_TEAMS,
+        sessions: BASELINE_SESSIONS,
+        clueAttempts: [],
+        results: BASELINE_RESULTS,
+        settings: {
+          registrationsOpen: true,
+          cluePointValue: 1,
+          finalBonusPoints: 2,
+          disabledPuzzleIds: []
+        },
+        auditLogs: [
+          {
+            id: 'log-baseline',
+            action: 'DB_INITIALIZED',
+            details: 'BYTE HUNT serverless instance initialized',
+            timestamp: new Date().toISOString()
+          }
+        ],
+        tabSwitchIncidents: []
+      };
+    }
+
     try {
       if (!fs.existsSync(DB_DIR)) {
         fs.mkdirSync(DB_DIR, { recursive: true });
@@ -213,7 +250,6 @@ class DatabaseService {
         const parsed = JSON.parse(raw);
 
         // Sanitize existing file data to ensure ONLY valid teams exist and duplicates are removed
-        const validTeamIds = new Set(BASELINE_TEAMS.map(t => t.id));
         const filteredTeams = (parsed.teams || []).filter((t: Team) => {
           const lower = t.name.trim().toLowerCase();
           return lower === 'dual impact' || lower === 'tech max' || !lower.includes('seed');
@@ -288,6 +324,10 @@ class DatabaseService {
   }
 
   private saveFileDatabase(dataToSave: DatabaseSchema = this.fileData): void {
+    // Never attempt local file writes in Vercel or when PostgreSQL is active
+    if (this.isPostgresReady || process.env.VERCEL) {
+      return;
+    }
     try {
       if (!fs.existsSync(DB_DIR)) {
         fs.mkdirSync(DB_DIR, { recursive: true });
@@ -295,24 +335,34 @@ class DatabaseService {
       const tmpFile = `${DB_FILE}.tmp`;
       fs.writeFileSync(tmpFile, JSON.stringify(dataToSave, null, 2), 'utf-8');
       fs.renameSync(tmpFile, DB_FILE);
-    } catch (err) {
-      console.error('Failed to write database file:', err);
+    } catch {
+      // Ignored in read-only / serverless filesystems
     }
   }
 
   // --- PostgreSQL / Cloud Database Support ---
   private async initPostgresIfAvailable() {
-    const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
-    if (!dbUrl) return;
+    const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING;
+    if (!dbUrl) {
+      console.log('[BYTE HUNT DB] No DATABASE_URL found. Running with in-memory baseline state.');
+      return;
+    }
 
     try {
-      this.pgPool = new pg.Pool({
-        connectionString: dbUrl,
-        ssl: dbUrl.includes('localhost') ? false : { rejectUnauthorized: false },
-        max: 20, // Supports 15-20 simultaneous participants
-        idleTimeoutMillis: 30000,
-        connectionTimeoutMillis: 5000
-      });
+      if (!this.pgPool) {
+        const isLocal = dbUrl.includes('localhost') || dbUrl.includes('127.0.0.1');
+        this.pgPool = new pg.Pool({
+          connectionString: dbUrl,
+          ssl: isLocal ? false : { rejectUnauthorized: false },
+          max: 10, // Supports 15-20 simultaneous participants across serverless lambdas
+          idleTimeoutMillis: 30000,
+          connectionTimeoutMillis: 10000
+        });
+
+        this.pgPool.on('error', (err) => {
+          console.error('[BYTE HUNT DB] Unexpected error on idle Postgres client:', err);
+        });
+      }
 
       // Verify connection and create tables
       const client = await this.pgPool.connect();
@@ -343,7 +393,9 @@ class DatabaseService {
             duration_ms BIGINT,
             score INT DEFAULT 0,
             status TEXT DEFAULT 'active',
-            final_submitted_word TEXT
+            final_submitted_word TEXT,
+            penalty_seconds INT DEFAULT 0,
+            tab_switch_count INT DEFAULT 0
           );
 
           CREATE TABLE IF NOT EXISTS bytehunt_clue_attempts (
@@ -367,7 +419,8 @@ class DatabaseService {
             target_word TEXT NOT NULL,
             score INT NOT NULL,
             duration_ms BIGINT NOT NULL,
-            completed_at TIMESTAMPTZ DEFAULT NOW()
+            completed_at TIMESTAMPTZ DEFAULT NOW(),
+            penalty_seconds INT DEFAULT 0
           );
 
           CREATE TABLE IF NOT EXISTS bytehunt_settings (
@@ -395,6 +448,7 @@ class DatabaseService {
           );
 
           ALTER TABLE bytehunt_sessions ADD COLUMN IF NOT EXISTS penalty_seconds INT DEFAULT 0;
+          ALTER TABLE bytehunt_sessions ADD COLUMN IF NOT EXISTS tab_switch_count INT DEFAULT 0;
           ALTER TABLE bytehunt_results ADD COLUMN IF NOT EXISTS penalty_seconds INT DEFAULT 0;
         `);
 
@@ -411,34 +465,36 @@ class DatabaseService {
           }
           for (const s of BASELINE_SESSIONS) {
             await client.query(
-              `INSERT INTO bytehunt_sessions (id, team_id, session_token, puzzle_id, assigned_clue_ids, current_clue_index, collected_letters, start_time, last_activity_time, completed_time, duration_ms, score, status, final_submitted_word)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+              `INSERT INTO bytehunt_sessions (id, team_id, session_token, puzzle_id, assigned_clue_ids, current_clue_index, collected_letters, start_time, last_activity_time, completed_time, duration_ms, score, status, final_submitted_word, penalty_seconds, tab_switch_count)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
                ON CONFLICT (id) DO NOTHING`,
-              [s.id, s.teamId, s.sessionToken, s.puzzleId, JSON.stringify(s.assignedClueIds), s.currentClueIndex, JSON.stringify(s.collectedLetters), s.startTime, s.lastActivityTime, s.completedTime, s.durationMs, s.score, s.status, s.finalSubmittedWord]
+              [s.id, s.teamId, s.sessionToken, s.puzzleId, JSON.stringify(s.assignedClueIds), s.currentClueIndex, JSON.stringify(s.collectedLetters), s.startTime, s.lastActivityTime, s.completedTime, s.durationMs, s.score, s.status, s.finalSubmittedWord, s.penaltySeconds || 0, s.tabSwitchCount || 0]
             );
           }
           for (const r of BASELINE_RESULTS) {
             await client.query(
-              `INSERT INTO bytehunt_results (id, session_id, team_id, team_name, leader_name, participants, puzzle_id, target_word, score, duration_ms, completed_at)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+              `INSERT INTO bytehunt_results (id, session_id, team_id, team_name, leader_name, participants, puzzle_id, target_word, score, duration_ms, completed_at, penalty_seconds)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
                ON CONFLICT (team_id) DO NOTHING`,
-              [r.id, r.sessionId, r.teamId, r.teamName, r.leaderName, r.participants, r.puzzleId, r.targetWord, r.score, r.durationMs, r.completedAt]
+              [r.id, r.sessionId, r.teamId, r.teamName, r.leaderName, r.participants, r.puzzleId, r.targetWord, r.score, r.durationMs, r.completedAt, r.penaltySeconds || 0]
             );
           }
         }
         this.isPostgresReady = true;
-        console.log('[BYTE HUNT DB] Connected to PostgreSQL successfully with pool of 20 connections.');
+        console.log('[BYTE HUNT DB] Connected to PostgreSQL successfully with pooled connection.');
       } finally {
         client.release();
       }
     } catch (err) {
-      console.error('[BYTE HUNT DB] PostgreSQL initialization failed, falling back to persistent file storage:', err);
+      console.error('[BYTE HUNT DB] PostgreSQL connection failed:', err);
       this.isPostgresReady = false;
+      this.initPromise = null; // Allow retry on subsequent requests
     }
   }
 
   // --- Audit Logs ---
   public async log(action: string, details: string) {
+    await this.ensureInitialized();
     const logItem: AuditLog = {
       id: `log-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       action,
@@ -465,6 +521,7 @@ class DatabaseService {
   }
 
   public async getLogs(): Promise<AuditLog[]> {
+    await this.ensureInitialized();
     if (this.isPostgresReady && this.pgPool) {
       try {
         const res = await this.pgPool.query('SELECT * FROM bytehunt_audit_logs ORDER BY timestamp DESC LIMIT 50');
@@ -478,6 +535,7 @@ class DatabaseService {
 
   // --- Settings ---
   public async getSettings(): Promise<AdminSettings> {
+    await this.ensureInitialized();
     if (this.isPostgresReady && this.pgPool) {
       try {
         const res = await this.pgPool.query('SELECT * FROM bytehunt_settings WHERE id = 1');
@@ -498,6 +556,7 @@ class DatabaseService {
   }
 
   public async updateSettings(partial: Partial<AdminSettings>): Promise<AdminSettings> {
+    await this.ensureInitialized();
     const updated = { ...this.fileData.settings, ...partial };
     this.fileData.settings = updated;
     this.saveFileDatabase();
@@ -524,6 +583,7 @@ class DatabaseService {
 
   // --- Teams (Atomic deduplication) ---
   public async createTeam(teamData: Omit<Team, 'id' | 'createdAt'>): Promise<Team> {
+    await this.ensureInitialized();
     const cleanName = teamData.name.trim();
     const cleanLower = cleanName.toLowerCase();
 
@@ -579,6 +639,7 @@ class DatabaseService {
   }
 
   public async getTeam(teamId: string): Promise<Team | undefined> {
+    await this.ensureInitialized();
     if (this.isPostgresReady && this.pgPool) {
       try {
         const res = await this.pgPool.query('SELECT * FROM bytehunt_teams WHERE id = $1', [teamId]);
@@ -602,6 +663,7 @@ class DatabaseService {
   }
 
   public async getTeamByName(name: string): Promise<Team | undefined> {
+    await this.ensureInitialized();
     const cleanLower = name.trim().toLowerCase();
     if (this.isPostgresReady && this.pgPool) {
       try {
@@ -626,6 +688,7 @@ class DatabaseService {
   }
 
   public async getAllTeams(): Promise<Team[]> {
+    await this.ensureInitialized();
     if (this.isPostgresReady && this.pgPool) {
       try {
         const res = await this.pgPool.query('SELECT * FROM bytehunt_teams ORDER BY created_at ASC');
@@ -647,6 +710,7 @@ class DatabaseService {
 
   // --- Random Puzzle Assignment ---
   public async pickPuzzleForTeam(): Promise<PuzzleData> {
+    await this.ensureInitialized();
     const settings = await this.getSettings();
     const disabled = new Set(settings.disabledPuzzleIds || []);
     const availablePuzzles = ALL_PUZZLES.filter(p => !disabled.has(p.puzzleId));
@@ -679,6 +743,7 @@ class DatabaseService {
 
   // --- Game Sessions (Idempotent) ---
   public async createGameSession(teamId: string, puzzle: PuzzleData): Promise<GameSession> {
+    await this.ensureInitialized();
     // If active session already exists for this team, return it immediately to prevent duplicate sessions
     const existing = await this.getSessionByTeamId(teamId);
     if (existing) {
@@ -704,15 +769,17 @@ class DatabaseService {
       durationMs: null,
       score: 0,
       status: 'active',
-      finalSubmittedWord: null
+      finalSubmittedWord: null,
+      penaltySeconds: 0,
+      tabSwitchCount: 0
     };
 
     if (this.isPostgresReady && this.pgPool) {
       try {
         await this.pgPool.query(`
-          INSERT INTO bytehunt_sessions (id, team_id, session_token, puzzle_id, assigned_clue_ids, current_clue_index, collected_letters, start_time, last_activity_time, score, status)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-        `, [session.id, session.teamId, session.sessionToken, session.puzzleId, JSON.stringify(session.assignedClueIds), session.currentClueIndex, JSON.stringify(session.collectedLetters), session.startTime, session.lastActivityTime, session.score, session.status]);
+          INSERT INTO bytehunt_sessions (id, team_id, session_token, puzzle_id, assigned_clue_ids, current_clue_index, collected_letters, start_time, last_activity_time, score, status, penalty_seconds, tab_switch_count)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        `, [session.id, session.teamId, session.sessionToken, session.puzzleId, JSON.stringify(session.assignedClueIds), session.currentClueIndex, JSON.stringify(session.collectedLetters), session.startTime, session.lastActivityTime, session.score, session.status, 0, 0]);
       } catch (err) {
         console.error('Postgres createGameSession error:', err);
       }
@@ -725,6 +792,7 @@ class DatabaseService {
   }
 
   public async getSession(sessionId: string): Promise<GameSession | undefined> {
+    await this.ensureInitialized();
     if (this.isPostgresReady && this.pgPool) {
       try {
         const res = await this.pgPool.query('SELECT * FROM bytehunt_sessions WHERE id = $1', [sessionId]);
@@ -744,7 +812,9 @@ class DatabaseService {
             durationMs: row.duration_ms ? Number(row.duration_ms) : null,
             score: row.score,
             status: row.status,
-            finalSubmittedWord: row.final_submitted_word
+            finalSubmittedWord: row.final_submitted_word,
+            penaltySeconds: Number(row.penalty_seconds) || 0,
+            tabSwitchCount: Number(row.tab_switch_count) || 0
           };
         }
       } catch (err) {
@@ -755,6 +825,7 @@ class DatabaseService {
   }
 
   public async getSessionByTeamId(teamId: string): Promise<GameSession | undefined> {
+    await this.ensureInitialized();
     if (this.isPostgresReady && this.pgPool) {
       try {
         const res = await this.pgPool.query("SELECT * FROM bytehunt_sessions WHERE team_id = $1 AND status = 'active' LIMIT 1", [teamId]);
@@ -774,7 +845,9 @@ class DatabaseService {
             durationMs: row.duration_ms ? Number(row.duration_ms) : null,
             score: row.score,
             status: row.status,
-            finalSubmittedWord: row.final_submitted_word
+            finalSubmittedWord: row.final_submitted_word,
+            penaltySeconds: Number(row.penalty_seconds) || 0,
+            tabSwitchCount: Number(row.tab_switch_count) || 0
           };
         }
       } catch (err) {
@@ -785,6 +858,7 @@ class DatabaseService {
   }
 
   public async getAllSessions(): Promise<GameSession[]> {
+    await this.ensureInitialized();
     if (this.isPostgresReady && this.pgPool) {
       try {
         const res = await this.pgPool.query('SELECT * FROM bytehunt_sessions ORDER BY start_time ASC');
@@ -802,7 +876,9 @@ class DatabaseService {
           durationMs: row.duration_ms ? Number(row.duration_ms) : null,
           score: row.score,
           status: row.status,
-          finalSubmittedWord: row.final_submitted_word
+          finalSubmittedWord: row.final_submitted_word,
+          penaltySeconds: Number(row.penalty_seconds) || 0,
+          tabSwitchCount: Number(row.tab_switch_count) || 0
         }));
       } catch (err) {
         console.error('Postgres getAllSessions error:', err);
@@ -812,6 +888,7 @@ class DatabaseService {
   }
 
   public async updateSession(sessionId: string, updates: Partial<GameSession>): Promise<GameSession | undefined> {
+    await this.ensureInitialized();
     const session = await this.getSession(sessionId);
     if (!session) return undefined;
 
@@ -835,8 +912,10 @@ class DatabaseService {
             completed_time = $5,
             duration_ms = $6,
             final_submitted_word = $7,
-            last_activity_time = $8
-          WHERE id = $9
+            last_activity_time = $8,
+            penalty_seconds = COALESCE($9, penalty_seconds),
+            tab_switch_count = COALESCE($10, tab_switch_count)
+          WHERE id = $11
         `, [
           merged.currentClueIndex,
           JSON.stringify(merged.collectedLetters),
@@ -846,6 +925,8 @@ class DatabaseService {
           merged.durationMs,
           merged.finalSubmittedWord,
           merged.lastActivityTime,
+          merged.penaltySeconds !== undefined ? merged.penaltySeconds : null,
+          merged.tabSwitchCount !== undefined ? merged.tabSwitchCount : null,
           sessionId
         ]);
       } catch (err) {
@@ -857,6 +938,7 @@ class DatabaseService {
   }
 
   public async resetTeamSession(teamId: string): Promise<boolean> {
+    await this.ensureInitialized();
     if (this.isPostgresReady && this.pgPool) {
       try {
         await this.pgPool.query('DELETE FROM bytehunt_tab_incidents WHERE team_id = $1', [teamId]);
@@ -884,6 +966,7 @@ class DatabaseService {
 
   // --- Clue Attempts ---
   public async recordClueAttempt(attempt: Omit<ClueAttempt, 'id' | 'timestamp'>): Promise<ClueAttempt> {
+    await this.ensureInitialized();
     const fullAttempt: ClueAttempt = {
       ...attempt,
       id: `att-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
@@ -907,6 +990,7 @@ class DatabaseService {
   }
 
   public async getAllAttempts(): Promise<ClueAttempt[]> {
+    await this.ensureInitialized();
     if (this.isPostgresReady && this.pgPool) {
       try {
         const res = await this.pgPool.query('SELECT * FROM bytehunt_clue_attempts ORDER BY timestamp DESC');
@@ -928,6 +1012,7 @@ class DatabaseService {
 
   // --- Results & Leaderboard (Strict Idempotency) ---
   public async recordGameCompletion(resultData: Omit<GameResult, 'id' | 'completedAt'>): Promise<GameResult> {
+    await this.ensureInitialized();
     // 1. Strict duplicate check in memory/file
     const existing = this.fileData.results.find(
       r => r.sessionId === resultData.sessionId || r.teamId === resultData.teamId || r.teamName.trim().toLowerCase() === resultData.teamName.trim().toLowerCase()
@@ -945,11 +1030,14 @@ class DatabaseService {
     if (this.isPostgresReady && this.pgPool) {
       try {
         const res = await this.pgPool.query(`
-          INSERT INTO bytehunt_results (id, session_id, team_id, team_name, leader_name, participants, puzzle_id, target_word, score, duration_ms, completed_at)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-          ON CONFLICT (team_id) DO UPDATE SET score = EXCLUDED.score
+          INSERT INTO bytehunt_results (id, session_id, team_id, team_name, leader_name, participants, puzzle_id, target_word, score, duration_ms, completed_at, penalty_seconds)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+          ON CONFLICT (team_id) DO UPDATE SET
+            score = EXCLUDED.score,
+            duration_ms = EXCLUDED.duration_ms,
+            penalty_seconds = EXCLUDED.penalty_seconds
           RETURNING *
-        `, [result.id, result.sessionId, result.teamId, result.teamName, result.leaderName, result.participants, result.puzzleId, result.targetWord, result.score, result.durationMs, result.completedAt]);
+        `, [result.id, result.sessionId, result.teamId, result.teamName, result.leaderName, result.participants, result.puzzleId, result.targetWord, result.score, result.durationMs, result.completedAt, result.penaltySeconds || 0]);
 
         if (res.rows.length > 0) {
           const row = res.rows[0];
@@ -964,7 +1052,8 @@ class DatabaseService {
             targetWord: row.target_word,
             score: row.score,
             durationMs: Number(row.duration_ms),
-            completedAt: row.completed_at
+            completedAt: row.completed_at,
+            penaltySeconds: Number(row.penalty_seconds) || 0
           };
           this.fileData.results = this.fileData.results.filter(r => r.teamId !== persisted.teamId);
           this.fileData.results.push(persisted);
@@ -984,6 +1073,7 @@ class DatabaseService {
   }
 
   public async getLeaderboard(): Promise<GameResult[]> {
+    await this.ensureInitialized();
     if (this.isPostgresReady && this.pgPool) {
       try {
         const res = await this.pgPool.query(`
@@ -1032,6 +1122,7 @@ class DatabaseService {
 
   // --- Tab Switch Incidents & Penalties ---
   public async recordTabSwitchIncident(sessionId: string): Promise<{ incident: TabSwitchIncident; count: number; teamName: string } | null> {
+    await this.ensureInitialized();
     const session = await this.getSession(sessionId);
     if (!session) return null;
     const team = await this.getTeam(session.teamId);
@@ -1074,6 +1165,7 @@ class DatabaseService {
   }
 
   public async getAllTabIncidents(): Promise<TabSwitchIncident[]> {
+    await this.ensureInitialized();
     if (this.isPostgresReady && this.pgPool) {
       try {
         const res = await this.pgPool.query('SELECT * FROM bytehunt_tab_incidents ORDER BY timestamp DESC');
@@ -1100,6 +1192,7 @@ class DatabaseService {
   }
 
   public async applyPenalty(teamId: string, penaltySeconds: number, reason?: string): Promise<{ success: boolean; penaltySeconds: number; teamName: string } | null> {
+    await this.ensureInitialized();
     const team = await this.getTeam(teamId);
     if (!team) return null;
 
