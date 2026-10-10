@@ -1,0 +1,6 @@
+{
+  "name": "BYTE HUNT - Technical Puzzle Adventure",
+  "description": "Interactive technical treasure hunt where teams solve cryptic technical clues, collect letters, and race against the clock to unlock hidden secret words.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

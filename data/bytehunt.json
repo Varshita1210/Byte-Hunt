@@ -1,0 +1,545 @@
+{
+  "teams": [
+    {
+      "name": "Dual Impact",
+      "leaderName": "varshita",
+      "participants": "kartika,katika,kathika",
+      "department": "csm/3rd year",
+      "teamSize": 4,
+      "id": "team-1791616926495-xkv2y",
+      "createdAt": "2026-10-10T07:22:06.495Z"
+    },
+    {
+      "name": "Tech Max",
+      "leaderName": "varshu",
+      "participants": "",
+      "department": "csm/3rd year",
+      "teamSize": 1,
+      "id": "team-1791615925555-15gqk",
+      "createdAt": "2026-10-10T07:05:25.555Z"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "sess-1791616926620-ocslb",
+      "teamId": "team-1791616926495-xkv2y",
+      "sessionToken": "tok-1791616926620-sb7fv4xw",
+      "puzzleId": "puzzle-b1-04",
+      "assignedClueIds": [
+        "b1-04-c3",
+        "b1-04-c7",
+        "b1-04-c4",
+        "b1-04-c2",
+        "b1-04-c8",
+        "b1-04-c9",
+        "b1-04-c6",
+        "b1-04-c5",
+        "b1-04-c1",
+        "b1-04-c10"
+      ],
+      "currentClueIndex": 10,
+      "collectedLetters": [
+        "O",
+        "H",
+        "C",
+        "L",
+        "A",
+        "I",
+        "C",
+        "K",
+        "B",
+        "N"
+      ],
+      "startTime": 1791616926620,
+      "lastActivityTime": 1791619180779,
+      "completedTime": 1791617174440,
+      "durationMs": 247820,
+      "score": 12,
+      "status": "completed",
+      "finalSubmittedWord": "BLOCK CHAIN"
+    },
+    {
+      "id": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "sessionToken": "tok-1791615925633-5qx3ilxc",
+      "puzzleId": "puzzle-b1-03",
+      "assignedClueIds": [
+        "b1-03-c3",
+        "b1-03-c8",
+        "b1-03-c7",
+        "b1-03-c1",
+        "b1-03-c4",
+        "b1-03-c6",
+        "b1-03-c9",
+        "b1-03-c10",
+        "b1-03-c5",
+        "b1-03-c2"
+      ],
+      "currentClueIndex": 10,
+      "collectedLetters": [
+        "T",
+        "I",
+        "T",
+        "A",
+        "O",
+        "A",
+        "O",
+        "N",
+        "M",
+        "U"
+      ],
+      "startTime": 1791615925633,
+      "lastActivityTime": 1791616349422,
+      "completedTime": 1791616349422,
+      "durationMs": 423789,
+      "score": 12,
+      "status": "completed",
+      "finalSubmittedWord": "AUTOMATION"
+    }
+  ],
+  "clueAttempts": [
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c3",
+      "submittedAnswer": "screen",
+      "isCorrect": false,
+      "id": "att-1791615949946-q037",
+      "timestamp": 1791615949946
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c3",
+      "submittedAnswer": "moniter",
+      "isCorrect": false,
+      "id": "att-1791615967006-wjq3",
+      "timestamp": 1791615967006
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c3",
+      "submittedAnswer": "phone",
+      "isCorrect": false,
+      "id": "att-1791615981662-keeu",
+      "timestamp": 1791615981662
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c3",
+      "submittedAnswer": "touch screen",
+      "isCorrect": true,
+      "id": "att-1791616020967-8ydu",
+      "timestamp": 1791616020967
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c8",
+      "submittedAnswer": "gmail",
+      "isCorrect": false,
+      "id": "att-1791616032273-70v5",
+      "timestamp": 1791616032273
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c8",
+      "submittedAnswer": "website",
+      "isCorrect": false,
+      "id": "att-1791616056709-z6gr",
+      "timestamp": 1791616056709
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c8",
+      "submittedAnswer": "inbox",
+      "isCorrect": true,
+      "id": "att-1791616081989-0osb",
+      "timestamp": 1791616081989
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c7",
+      "submittedAnswer": "malware",
+      "isCorrect": false,
+      "id": "att-1791616108565-2nvk",
+      "timestamp": 1791616108565
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c7",
+      "submittedAnswer": "trojan horse",
+      "isCorrect": true,
+      "id": "att-1791616136675-w0p4",
+      "timestamp": 1791616136675
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c1",
+      "submittedAnswer": "ai",
+      "isCorrect": true,
+      "id": "att-1791616146390-xo65",
+      "timestamp": 1791616146390
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c4",
+      "submittedAnswer": "open sourse",
+      "isCorrect": false,
+      "id": "att-1791616187542-lupn",
+      "timestamp": 1791616187542
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c4",
+      "submittedAnswer": "open source",
+      "isCorrect": true,
+      "id": "att-1791616193783-35pz",
+      "timestamp": 1791616193783
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c6",
+      "submittedAnswer": "i",
+      "isCorrect": false,
+      "id": "att-1791616200681-ktww",
+      "timestamp": 1791616200681
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c6",
+      "submittedAnswer": "antivirus",
+      "isCorrect": true,
+      "id": "att-1791616217872-ep50",
+      "timestamp": 1791616217872
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c9",
+      "submittedAnswer": "online",
+      "isCorrect": true,
+      "id": "att-1791616231188-hyns",
+      "timestamp": 1791616231188
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c10",
+      "submittedAnswer": "notification",
+      "isCorrect": true,
+      "id": "att-1791616243940-bgkg",
+      "timestamp": 1791616243940
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c5",
+      "submittedAnswer": "mother board",
+      "isCorrect": true,
+      "id": "att-1791616270185-bh00",
+      "timestamp": 1791616270185
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c2",
+      "submittedAnswer": "pen",
+      "isCorrect": false,
+      "id": "att-1791616288136-refq",
+      "timestamp": 1791616288136
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c2",
+      "submittedAnswer": "usp",
+      "isCorrect": false,
+      "id": "att-1791616302227-gfxj",
+      "timestamp": 1791616302227
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "clueId": "b1-03-c2",
+      "submittedAnswer": "usb",
+      "isCorrect": true,
+      "id": "att-1791616323070-cwm6",
+      "timestamp": 1791616323070
+    },
+    {
+      "sessionId": "sess-1791616926620-ocslb",
+      "teamId": "team-1791616926495-xkv2y",
+      "clueId": "b1-04-c3",
+      "submittedAnswer": "excel",
+      "isCorrect": false,
+      "id": "att-1791616934070-e78n",
+      "timestamp": 1791616934070
+    },
+    {
+      "sessionId": "sess-1791616926620-ocslb",
+      "teamId": "team-1791616926495-xkv2y",
+      "clueId": "b1-04-c3",
+      "submittedAnswer": "Microsoft Office/365",
+      "isCorrect": false,
+      "id": "att-1791616971378-ctqp",
+      "timestamp": 1791616971378
+    },
+    {
+      "sessionId": "sess-1791616926620-ocslb",
+      "teamId": "team-1791616926495-xkv2y",
+      "clueId": "b1-04-c3",
+      "submittedAnswer": "Microsoft Office",
+      "isCorrect": true,
+      "id": "att-1791616978022-883z",
+      "timestamp": 1791616978022
+    },
+    {
+      "sessionId": "sess-1791616926620-ocslb",
+      "teamId": "team-1791616926495-xkv2y",
+      "clueId": "b1-04-c7",
+      "submittedAnswer": "html",
+      "isCorrect": true,
+      "id": "att-1791616985929-qd8r",
+      "timestamp": 1791616985929
+    },
+    {
+      "sessionId": "sess-1791616926620-ocslb",
+      "teamId": "team-1791616926495-xkv2y",
+      "clueId": "b1-04-c4",
+      "submittedAnswer": "cloud",
+      "isCorrect": true,
+      "id": "att-1791616993798-prud",
+      "timestamp": 1791616993798
+    },
+    {
+      "sessionId": "sess-1791616926620-ocslb",
+      "teamId": "team-1791616926495-xkv2y",
+      "clueId": "b1-04-c2",
+      "submittedAnswer": "linus",
+      "isCorrect": false,
+      "id": "att-1791617012018-zwij",
+      "timestamp": 1791617012018
+    },
+    {
+      "sessionId": "sess-1791616926620-ocslb",
+      "teamId": "team-1791616926495-xkv2y",
+      "clueId": "b1-04-c2",
+      "submittedAnswer": "linux",
+      "isCorrect": true,
+      "id": "att-1791617048535-1uod",
+      "timestamp": 1791617048535
+    },
+    {
+      "sessionId": "sess-1791616926620-ocslb",
+      "teamId": "team-1791616926495-xkv2y",
+      "clueId": "b1-04-c8",
+      "submittedAnswer": "android",
+      "isCorrect": true,
+      "id": "att-1791617094463-7vvn",
+      "timestamp": 1791617094463
+    },
+    {
+      "sessionId": "sess-1791616926620-ocslb",
+      "teamId": "team-1791616926495-xkv2y",
+      "clueId": "b1-04-c9",
+      "submittedAnswer": "wan",
+      "isCorrect": false,
+      "id": "att-1791617012018-mdjf",
+      "timestamp": 1791617102200
+    },
+    {
+      "sessionId": "sess-1791616926620-ocslb",
+      "teamId": "team-1791616926495-xkv2y",
+      "clueId": "b1-04-c9",
+      "submittedAnswer": "lan",
+      "isCorrect": false,
+      "id": "att-1791617113755-hojf",
+      "timestamp": 1791617113755
+    },
+    {
+      "sessionId": "sess-1791616926620-ocslb",
+      "teamId": "team-1791616926495-xkv2y",
+      "clueId": "b1-04-c9",
+      "submittedAnswer": "internet",
+      "isCorrect": true,
+      "id": "att-1791617124015-9ae5",
+      "timestamp": 1791617124015
+    },
+    {
+      "sessionId": "sess-1791616926620-ocslb",
+      "teamId": "team-1791616926495-xkv2y",
+      "clueId": "b1-04-c6",
+      "submittedAnswer": "compiler",
+      "isCorrect": true,
+      "id": "att-1791617132643-zloe",
+      "timestamp": 1791617132643
+    },
+    {
+      "sessionId": "sess-1791616926620-ocslb",
+      "teamId": "team-1791616926495-xkv2y",
+      "clueId": "b1-04-c5",
+      "submittedAnswer": "key board",
+      "isCorrect": true,
+      "id": "att-1791617140833-03rx",
+      "timestamp": 1791617140833
+    },
+    {
+      "sessionId": "sess-1791616926620-ocslb",
+      "teamId": "team-1791616926495-xkv2y",
+      "clueId": "b1-04-c1",
+      "submittedAnswer": "bug",
+      "isCorrect": true,
+      "id": "att-1791617148407-bcxs",
+      "timestamp": 1791617148407
+    },
+    {
+      "sessionId": "sess-1791616926620-ocslb",
+      "teamId": "team-1791616926495-xkv2y",
+      "clueId": "b1-04-c10",
+      "submittedAnswer": "not",
+      "isCorrect": true,
+      "id": "att-1791617155531-usd7",
+      "timestamp": 1791617155531
+    }
+  ],
+  "results": [
+    {
+      "sessionId": "sess-1791616926620-ocslb",
+      "teamId": "team-1791616926495-xkv2y",
+      "teamName": "Dual Impact",
+      "leaderName": "varshita",
+      "participants": "kartika,katika,kathika",
+      "puzzleId": "puzzle-b1-04",
+      "targetWord": "BLOCKCHAIN",
+      "score": 12,
+      "durationMs": 247820,
+      "id": "res-1791617174441-ysj4",
+      "completedAt": "2026-10-10T07:26:14.441Z",
+      "penaltySeconds": 0
+    },
+    {
+      "sessionId": "sess-1791615925633-f2kn7",
+      "teamId": "team-1791615925555-15gqk",
+      "teamName": "Tech Max",
+      "leaderName": "varshu",
+      "participants": "",
+      "puzzleId": "puzzle-b1-03",
+      "targetWord": "AUTOMATION",
+      "score": 12,
+      "durationMs": 423789,
+      "id": "res-1791616349422-1egp",
+      "completedAt": "2026-10-10T07:12:29.422Z"
+    }
+  ],
+  "settings": {
+    "registrationsOpen": true,
+    "cluePointValue": 1,
+    "finalBonusPoints": 2,
+    "disabledPuzzleIds": []
+  },
+  "auditLogs": [
+    {
+      "id": "log-1791619238088-bgco",
+      "action": "TIME_PENALTY_APPLIED",
+      "details": "Admin applied 60s penalty to team \"Test Team Alpha\". Switched tabs 2 times",
+      "timestamp": "2026-10-10T08:00:38.088Z"
+    },
+    {
+      "id": "log-1791619229817-h3op",
+      "action": "TAB_SWITCH_INCIDENT",
+      "details": "Team \"Test Team Alpha\" left active hunt page (Incident #2)",
+      "timestamp": "2026-10-10T08:00:29.817Z"
+    },
+    {
+      "id": "log-1791619224788-kgqy",
+      "action": "TAB_SWITCH_INCIDENT",
+      "details": "Team \"Test Team Alpha\" left active hunt page (Incident #1)",
+      "timestamp": "2026-10-10T08:00:24.788Z"
+    },
+    {
+      "id": "log-1791619221224-gdqw",
+      "action": "START_HUNT",
+      "details": "Session started for team team-1791619217619-31puc (Assigned word length: 8)",
+      "timestamp": "2026-10-10T08:00:21.224Z"
+    },
+    {
+      "id": "log-1791619217620-q79i",
+      "action": "CREATE_TEAM",
+      "details": "Team \"Test Team Alpha\" registered (ID: team-1791619217619-31puc)",
+      "timestamp": "2026-10-10T08:00:17.620Z"
+    },
+    {
+      "id": "log-1791619180781-amdr",
+      "action": "TIME_PENALTY_APPLIED",
+      "details": "Admin applied 0s penalty to team \"Dual Impact\". ",
+      "timestamp": "2026-10-10T07:59:40.781Z"
+    },
+    {
+      "id": "log-1791619180780-6xh8",
+      "action": "TIME_PENALTY_APPLIED",
+      "details": "Admin applied 60s penalty to team \"Dual Impact\". Test 60s tab switch penalty",
+      "timestamp": "2026-10-10T07:59:40.780Z"
+    },
+    {
+      "id": "log-1791619180779-voo5",
+      "action": "TAB_SWITCH_INCIDENT",
+      "details": "Team \"Dual Impact\" left active hunt page (Incident #2)",
+      "timestamp": "2026-10-10T07:59:40.779Z"
+    },
+    {
+      "id": "log-1791619180778-4fd8",
+      "action": "TAB_SWITCH_INCIDENT",
+      "details": "Team \"Dual Impact\" left active hunt page (Incident #1)",
+      "timestamp": "2026-10-10T07:59:40.778Z"
+    },
+    {
+      "id": "log-1791617174442-51zh",
+      "action": "GAME_COMPLETED",
+      "details": "Team Dual Impact completed hunt in 248s!",
+      "timestamp": "2026-10-10T07:26:14.442Z"
+    },
+    {
+      "id": "log-1791616926621-svvr",
+      "action": "START_HUNT",
+      "details": "Session started for team team-1791616926495-xkv2y (Assigned word length: 10)",
+      "timestamp": "2026-10-10T07:22:06.621Z"
+    },
+    {
+      "id": "log-1791616926496-y77b",
+      "action": "CREATE_TEAM",
+      "details": "Team \"Dual Impact\" registered (ID: team-1791616926495-xkv2y)",
+      "timestamp": "2026-10-10T07:22:06.496Z"
+    },
+    {
+      "id": "log-1791616349423-j2v6",
+      "action": "GAME_COMPLETED",
+      "details": "Team Tech Max completed hunt in 424s!",
+      "timestamp": "2026-10-10T07:12:29.423Z"
+    },
+    {
+      "id": "log-1791615925633-j01w",
+      "action": "START_HUNT",
+      "details": "Session started for team team-1791615925555-15gqk (Assigned word length: 10)",
+      "timestamp": "2026-10-10T07:05:25.633Z"
+    },
+    {
+      "id": "log-1791615925556-xdc1",
+      "action": "CREATE_TEAM",
+      "details": "Team \"Tech Max\" registered (ID: team-1791615925555-15gqk)",
+      "timestamp": "2026-10-10T07:05:25.556Z"
+    }
+  ],
+  "tabSwitchIncidents": []
+}
