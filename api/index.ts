@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
-import { apiRouter } from '../server/api';
-import { db } from '../server/db';
+import { apiRouter } from '../server/api.js';
+import { db } from '../server/db.js';
 
 dotenv.config();
 
