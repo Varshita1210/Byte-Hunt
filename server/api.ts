@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express';
 import dotenv from 'dotenv';
-import { db, Team, GameSession } from './db';
-import { ALL_PUZZLES, PuzzleData, ClueData } from './puzzles';
+import { db, Team, GameSession } from './db.js';
+import { ALL_PUZZLES, PuzzleData, ClueData } from './puzzles.js';
 
 dotenv.config();
 
