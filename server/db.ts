@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import pg from 'pg';
-import { ALL_PUZZLES, PuzzleData } from './puzzles';
+import { ALL_PUZZLES, PuzzleData } from './puzzles.js';
 
 export interface AdminUser {
   id: string;
